@@ -7,8 +7,9 @@
 #     http://www.apache.org/licenses/LICENSE-2.0
 
 # from bam.feetech.feetech_pwm_control import FeetechPWMControl
-from pypot.feetech import FeetechSTS3215IO
+# from pypot.feetech import FeetechSTS3215IO
 import rustypot
+from rustypot import Sts3215PyController
 import json
 import datetime
 import os
@@ -40,9 +41,10 @@ if args.trajectory not in trajectories:
 ids = [1]
 
 # motor = FeetechPWMControl(id=args.id)
-io = FeetechSTS3215IO("/dev/ttyACM0")
-io.set_mode({1: 0})
-# control = rustypot.feetech("/dev/ttyACM0", 1000000)
+# io = FeetechSTS3215IO("/dev/ttyACM0")
+# io = FeetechSTS3215IO(args.port)
+# io.set_mode({1: 0})
+control = rustypot.Sts3215PyController(args.port, 1000000, timeout=0.1)
 # control.set_mode(ids, 0)
 
 trajectory = trajectories[args.trajectory]
@@ -51,19 +53,19 @@ start = time.time()
 while time.time() - start < 1.0:
     goal_position, torque_enable = trajectory(0)
     if torque_enable:
-        io.set_goal_position({1: np.rad2deg(goal_position)})
-        # control.write_goal_position(ids, [goal_position])
-        io.enable_torque([1])
-        # control.enable_torque(ids)
+        # io.set_goal_position({1: np.rad2deg(goal_position)})
+        control.sync_write_goal_position(ids, [goal_position])
+        # io.enable_torque([1])
+        control.sync_write_torque_enable(ids, [True])
         # motor.goal_position = np.rad2deg(goal_position)
         # motor.enable_torque()
     else:
-        io.disable_torque([1])
-        # control.disable_torque(ids)
+        # io.disable_torque([1])
+        control.sync_write_torque_enable(ids, [False])
         # motor.disable_torque()
-    # control.set_kps(ids, [32])
-    io.set_P_coefficient({1: args.kp})
-    io.set_D_coefficient({1: 0})
+    control.sync_write_p_coefficient(ids, [args.kp])
+    # io.set_P_coefficient({1: args.kp})
+    # io.set_D_coefficient({1: 0})
 
     # motor.kp = args.kp
 
@@ -81,18 +83,19 @@ data = {
 
 
 def read_data():
-    # position = control.read_present_position(ids)[0]
-    position = np.deg2rad(io.get_present_position([1])[0])
+    position = control.sync_read_present_position(ids)[0]
+    # position = np.deg2rad(io.get_present_position([1])[0])
     # position = np.deg2rad(motor.io.get_present_position([motor.id])[0])
 
     # speed = np.deg2rad(motor.io.get_present_speed([motor.id])[0])  # TODO convert
     # speed = motor.get_present_speed()
-    # speed = control.read_present_velocity(ids)[0]
-    speed = np.deg2rad(io.get_present_speed([1])[0])
+    speed = control.sync_read_present_speed(ids)[0]
+    # speed = np.deg2rad(io.get_present_speed([1])[0])
 
     load = 0  # TMP
 
-    volts = io.get_present_voltage([1])[0] * 0.1
+    # volts = io.get_present_voltage([1])[0] * 0.1
+    volts = control.sync_read_present_voltage(ids)[0]
     # volts = 0
 
     # temp = motor.io.get_present_temperature([motor.id])[0]
@@ -112,18 +115,18 @@ while time.time() - start < trajectory.duration:
     goal_position, new_torque_enable = trajectory(t)
     if new_torque_enable != torque_enable:
         if new_torque_enable:
-            # control.enable_torque(ids)
+            control.sync_write_torque_enable(ids, [True])
             # motor.enable_torque()
-            io.enable_torque([1])
+            # io.enable_torque([1])
         else:
-            # control.disable_torque(ids)
-            io.disable_torque([1])
+            control.sync_write_torque_enable(ids, [False])
+            # io.disable_torque([1])
             # motor.disable_torque()
         torque_enable = new_torque_enable
         time.sleep(0.001)
     if torque_enable:
-        # control.write_goal_position(ids, [goal_position])
-        io.set_goal_position({1: np.rad2deg(goal_position)})
+        control.sync_write_goal_position(ids, [goal_position])
+        # io.set_goal_position({1: np.rad2deg(goal_position)})
 
         # motor.goal_position = np.rad2deg(goal_position)
         time.sleep(0.001)
@@ -147,19 +150,19 @@ while abs(goal_position) > 0:
     else:
         goal_position = min(0, goal_position + max_variation)
 
-    # control.write_goal_position(ids, [goal_position])
+    control.sync_write_goal_position(ids, [goal_position])
     # motor.goal_position = np.rad2deg(goal_position)
-    io.set_goal_position({1: np.rad2deg(goal_position)})
+    # io.set_goal_position({1: np.rad2deg(goal_position)})
 
     time.sleep(return_dt)
 
-# control.write_goal_position(ids, [0])
-io.set_goal_position({1: 0})
+control.sync_write_goal_position(ids, [False])
+# io.set_goal_position({1: 0})
 # motor.goal_position = 0
 time.sleep(1)
 
-# control.disable_torque(ids)
-io.disable_torque([1])
+control.sync_write_torque_enable(ids, [False])
+# io.disable_torque([1])
 # motor.disable_torque()
 
 
