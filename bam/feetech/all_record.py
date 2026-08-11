@@ -10,6 +10,7 @@ import argparse
 import os
 import time
 
+import subprocess # Windows
 
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("--mass", type=float, required=True)
@@ -24,10 +25,10 @@ args = arg_parser.parse_args()
 
 # kps = [130, 275, 550, 1100]
 kps = [4, 8, 16, 32]
-trajectories = ["brutal", "sin_sin", "lift_and_drop", "up_and_down", "sin_time_square"]
+trajectories = ["sin_sin", "lift_and_drop", "up_and_down", "sin_time_square"]
 
 command_base = (
-    f"python3 -m bam.feetech.record --mass {args.mass} --length {args.length}"
+    f"uv run python -m bam.feetech.record --mass {args.mass} --length {args.length}"
 )
 command_base += f" --port {args.port} --logdir {args.logdir} --motor {args.motor} --id {args.id} --vin {args.vin}"
 
@@ -45,7 +46,8 @@ for kp in kps:
             os.system("mpg321 /tmp/message.mp3")
 
         command = f"{command_base} --kp {kp} --trajectory {trajectory}"
-        os.system(command)
+        # os.system(command)
+        subprocess.run(command, shell=True, check=True)  # Windows
 
         if trajectory == "sin_time_square":
             time.sleep(3)
