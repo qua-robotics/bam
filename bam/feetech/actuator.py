@@ -239,7 +239,7 @@ class STS3032Actuator(VoltageControlledActuator):
         # Smaller than STS3215 initial range
         self.model.armature = Parameter(0.00005, 0.000001, 0.01)
 
-        self.model.q_offset = Parameter(0, -0.2, 0.2)
+        self.model.q_offset = Parameter(0, -0.2, 0.2) # model.py L.82
 
         self.model.max_velocity = Parameter(
             self.default_max_velocity,

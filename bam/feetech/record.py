@@ -156,7 +156,7 @@ while abs(goal_position) > 0:
 
     time.sleep(return_dt)
 
-control.sync_write_goal_position(ids, [False])
+control.sync_write_goal_position(ids, [0])
 # io.set_goal_position({1: 0})
 # motor.goal_position = 0
 time.sleep(1)
