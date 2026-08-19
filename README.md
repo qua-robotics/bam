@@ -3,7 +3,7 @@
 </p>
 
 # Change log
-- 2026-08-19 add Feetech STS3032 params
+### 2026-08-19 add Feetech STS3032 params
    
   identification in pyproject.toml\
       "PyQt5==5.15.11", "PyQt5-Qt5==5.15.2"
