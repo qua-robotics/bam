@@ -5,11 +5,11 @@
 # Change log
 - 2026-08-19 add Feetech STS3032 params
    
-  identification in pyproject.toml
+  identification in pyproject.toml\
       "PyQt5==5.15.11", "PyQt5-Qt5==5.15.2"
 
-Record in Windows
-    - length: 0.05, 0.07, 0.1 m
+Record in Windows\
+    - length: 0.05, 0.07, 0.1 m\
     - mass: 0.259, 0.3247, 0.457 kg
 
 for example
