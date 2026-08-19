@@ -3,7 +3,30 @@
 </p>
 
 # Change log
-2026-08-19 add Feetech STS3032 params
+・2026-08-19 add Feetech STS3032 params
+    identification in pyproject.toml
+      "PyQt5==5.15.11", "PyQt5-Qt5==5.15.2"
+
+record in Windows
+  length: 0.05, 0.07, 0.1 m
+  mass: 0.259, 0.3247, 0.457 kg
+
+for example
+```bash
+uv run python -m bam.feetech.all_record --port COM24 --id 1 --motor sts3032 --mass 0.259 --length 0.05 --vin 6.0 --logdir data_raw
+```
+make "data_processed" folder and
+```bash
+uv run python -m bam.process --raw data_raw --logdir data_processed --dt 0.005
+uv run python -m bam.plot --actuator sts3032 --logdir data_processed
+
+uv run python -m bam.fit --actuator sts3032 --model m1 --logdir data_processed --output bam/params/feetech_sts3032_6_0V/m1.json
+uv run python -m bam.plot --actuator sts3032 --logdir data_processed --sim --params bam/params/feetech_sts3032_6_0V/m1.json
+```
+to mujoco parameter
+```bash
+uv run python -m bam.to_mujoco --params bam/params/feetech_sts3032_6_0V/m1.json --kp 32 --vin 6.0
+```
 
 # BAM: Better Actuator Models
 
